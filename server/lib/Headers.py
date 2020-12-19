@@ -6,3 +6,4 @@ class Headers:
     ERROR = "error"
     AUTH = "auth"
     GET_MESSAGES = "get_messages"
+    MESSAGES = "messages"

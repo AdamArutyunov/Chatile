@@ -1,58 +1,95 @@
-Сообщение
-pack = {
-	"header": "send_message", 
-	"id" : ,
-	"text" : ,
-	"sending_date" : ,
-	"sender_login" : ,
-	"recipient_id" : ,
+CLIENT -> SERVER
+
+
+Запрос регистрации
+
+{
+  'header': 'register',
+  'body': {
+     'name': <str>,
+     'login': <str>,
+     'password': <str>
+  }
 }
+
+
+Запрос авторизации:
+
+{
+  'header': 'login',
+  'body': {
+     'login': <str>,
+     'password': <str>
+  }
+}
+
+
+Отправить сообщение:
+
+{
+  'header': 'send_message',
+  'body': {
+     'token': <str>,
+     'data': <str>,
+     'recipient_login': <str>
+  }
+}
+
+
+Получить всю историю сообщений
+
+{
+  'header': 'get_messages',
+  'body': {
+     'token': <str>,
+     'login': <str>
+  }
+}
+
+
+
+SERVER -> CLIENT
+
 
 Ошибка
-pack = {
-	"header" : "error", 
-	"error_type" : ,
-	"message": 
+
+{
+  'header': 'error',
+  'body': {
+     'code': <int>,
+     'message': <str>
+  }
 }
 
 
+OK
 
-Регистрация
-pack = {
-	"header" : "register", 
-	"name" : ,
-	"login" : ,
-	"password" : ,
+{
+  'header': 'ok'
 }
 
-Ответ OK
-pack = {
-	"header": "ok",
+
+Успешная авторизация/регистрация
+
+{
+  'header': 'auth',
+  'body': {
+     'token': <str>
+  }
 }
 
-Вход
-pack = {
-	"header" : "Enter",
-	"login" : ,
-	"password" : ,
-}
 
-Новые сообщения
-pack = {
-	"header" : "new_message",
-	[
-	"chatName" : ,
-	"Username" : ,
-	]
-}
+История сообщений
 
-Вход в чат
-pack = {
-	"header" : "Enter_chat",
-	"AllRead" : ,
-	"chatName" : ,
-	"Username" : ,
+{
+  'header': 'messages',
+  'body': {
+     'messages': [
+        {
+          'sender_login': <str>,
+          'recipient_login': <str>,
+          'data': <str>,
+          'sending_date': <int> (UNIX time)
+     ]
+  }
 }
-
-Получить запросы по логину
-Онлайн, оффлайн

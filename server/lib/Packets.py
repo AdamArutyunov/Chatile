@@ -18,7 +18,7 @@ class ErrorPacket(Packet):
         self.code = code
         self.message = message
 
-        super().__init__({'header': Headers.ERROR, 'code': code, 'message': message})
+        super().__init__({'header': Headers.ERROR, 'body': {'code': code, 'message': message}})
 
 
 class SyntaxErrorPacket(ErrorPacket):
@@ -48,21 +48,14 @@ class BadTokenErrorPacket(ErrorPacket):
 
 class OKPacket(Packet):
     def __init__(self):
-        super().__init__({"header": Headers.OK})
+        super().__init__({'header': Headers.OK})
 
 
 class AuthPacket(Packet):
     def __init__(self, token: str):
-        super().__init__({"header": Headers.AUTH, "token": token})
+        super().__init__({'header': Headers.AUTH, 'body': {'token': token}})
 
 
 class MessageBatchPacket(Packet):
     def __init__(self, sender_login: str, recipient_login: str, messages: list):
-        super().__init__({"header": "messages", "sender_login": sender_login, "recipient_login": recipient_login,
-                          "messages": messages})
-
-
-class MessagePacket(Packet):
-    def __init__(self, sender_login: str, recipient_login: str, messages: list):
-        super().__init__({"header": "messages", "sender_login": sender_login, "recipient_login": recipient_login,
-                          "messages": messages})
+        super().__init__({'header': Headers.MESSAGES, 'body': {'messages': messages}})

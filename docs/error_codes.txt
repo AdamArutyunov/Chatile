@@ -1,0 +1,5 @@
+1: SyntaxError
+2: BadRequest
+3: BadRegister
+4: BadLogin
+5: BadToken

@@ -94,12 +94,19 @@ class RequestHandler:
                 if not recipient:
                     return BadRequestErrorPacket("user does not exist")
 
-                messages = session.query(Message).filter((Message.sender == user) &
-                                                         (Message.recipient == recipient))\
+                messages = session.query(Message).filter(((Message.sender == user) & (Message.recipient == recipient)) |
+                                                         ((Message.sender == recipient) & (Message.recipient == user)))\
                     .order_by(Message.sending_date).all()
 
+                formatted_messages = []
+                for message in messages:
+                    formatted_messages.append({'sender_login': message.sender.login,
+                                               'recipient_login': message.recipient.login,
+                                               'data': message.data,
+                                               'sending_date': int(message.sending_date.timestamp())})
+
                 return MessageBatchPacket(user.login, recipient.login,
-                                          [message.to_dict(only=("data", "sending_time")) for message in messages])
+                                          formatted_messages)
 
         except Exception as e:
             return BadRequestErrorPacket(e)
