@@ -1,5 +1,6 @@
 import datetime
 import jwt
+import bcrypt
 import sqlalchemy.orm as orm
 from sqlalchemy import *
 from flask_login import UserMixin
@@ -20,7 +21,7 @@ class User(SqlAlchemyBase, UserMixin, SerializerMixin):
     # Логин
     login = Column(String, nullable=False, unique=True)
     # Отображаемое имя
-    name = Column(String, nullable=False, unique=True)
+    name = Column(String, nullable=False)
     # Хэшированный пароль
     hashed_password = Column(String, nullable=False)
     # Дата регистрации (сейчас не используется)
@@ -34,15 +35,13 @@ class User(SqlAlchemyBase, UserMixin, SerializerMixin):
 
     # Проверить пароль
     def check_password(self, password):
-        return check_password_hash(self.hashed_password, password)
+        return bcrypt.checkpw(password.encode(encoding='utf-8'),
+                              self.hashed_password.encode(encoding='utf-8'))
 
-    def auth(self, password):
+    def check_auth(self, password):
         if self.check_password(password):
-            token = jwt.encode({"user_id": self.id,
-                                "exp": datetime.datetime.now() + datetime.timedelta(hours=1)}, SECRET_WORD)
-            self.token = token
-
-            return AuthPacket(token)
+            self.auth()
+            return AuthPacket(self.token)
         return BadLoginErrorPacket("Bad login: invalid password")
 
     def check_token(self, token):
@@ -50,7 +49,8 @@ class User(SqlAlchemyBase, UserMixin, SerializerMixin):
             return False
 
         try:
-            data = jwt.decode(self.token, SECRET_WORD)
+            token = self.token.encode('utf-8')
+            data = jwt.decode(token, SECRET_WORD)
         except jwt.ExpiredSignatureError:
             return False
 
@@ -58,3 +58,10 @@ class User(SqlAlchemyBase, UserMixin, SerializerMixin):
             return True
 
         return False
+
+    def auth(self):
+        token = jwt.encode({"user_id": self.id,
+                            "exp": datetime.datetime.now() + datetime.timedelta(hours=1)}, SECRET_WORD)
+        self.token = token.decode('utf-8')
+
+        return AuthPacket(self.token)

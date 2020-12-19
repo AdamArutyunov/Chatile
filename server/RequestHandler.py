@@ -5,6 +5,7 @@ from lib.Packets import *
 from data.models.user import *
 from data.models.message import *
 
+
 def get_user_by_token(token):
     session = db_session.create_session()
 
@@ -42,7 +43,7 @@ class RequestHandler:
                 session.add(user)
                 session.commit()
 
-                return user.auth(password)
+                return user.auth()
 
             if header == Headers.LOGIN:
                 login = body['login']
@@ -52,7 +53,7 @@ class RequestHandler:
                 if not user:
                     return BadLoginErrorPacket("Bad login: invalid login")
 
-                return user.auth(password)
+                return user.check_auth(password)
 
             if header == Headers.SEND_MESSAGE:
                 token = body['token']
