@@ -27,11 +27,12 @@ class RequestHandler:
 
         try:
             header = request["header"]
+            body = request["body"]
 
             if header == Headers.REGISTER:
-                name = request['name']
-                login = request['login']
-                password = request['password']
+                name = body['name']
+                login = body['login']
+                password = body['password']
 
                 user = User()
                 user.name = name
@@ -44,8 +45,8 @@ class RequestHandler:
                 return user.auth(password)
 
             if header == Headers.LOGIN:
-                login = request['login']
-                password = request['password']
+                login = body['login']
+                password = body['password']
 
                 user = session.query(User).filter(User.login == login).first()
                 if not user:
@@ -54,14 +55,14 @@ class RequestHandler:
                 return user.auth(password)
 
             if header == Headers.SEND_MESSAGE:
-                token = request['token']
+                token = body['token']
 
                 user = get_user_by_token(token)
                 if not user:
                     return BadTokenErrorPacket()
 
-                data = request["data"]
-                recipient_login = request["recipient_login"]
+                data = body["data"]
+                recipient_login = body["recipient_login"]
 
                 recipient = session.query(User).filter(User.login == recipient_login).first()
                 if not recipient:
@@ -81,13 +82,13 @@ class RequestHandler:
                 return OKPacket()
 
             if header == Headers.GET_MESSAGES:
-                token = request['token']
+                token = body['token']
 
                 user = get_user_by_token(token)
                 if not user:
                     return BadTokenErrorPacket()
 
-                login = request['login']
+                login = body['login']
                 recipient = session.query(User).get(User.login == login)
 
                 if not recipient:

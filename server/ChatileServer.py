@@ -4,7 +4,6 @@ from RequestHandler import *
 from lib.Packets import *
 from random import randint
 
-APP_PORT = 1234
 
 print("Creating socket...")
 sock = socket.socket()
