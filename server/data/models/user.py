@@ -1,11 +1,14 @@
 import datetime
+import jwt
 import sqlalchemy.orm as orm
 from sqlalchemy import *
 from flask_login import UserMixin
 from sqlalchemy_serializer import SerializerMixin
 from werkzeug.security import generate_password_hash, check_password_hash
 from ..db_session import SqlAlchemyBase
+from lib.Packets import *
 from data import db_session
+from Constants import *
 
 
 class User(SqlAlchemyBase, UserMixin, SerializerMixin):
@@ -27,32 +30,31 @@ class User(SqlAlchemyBase, UserMixin, SerializerMixin):
 
     # Установить пароль
     def set_password(self, password):
-        self.hashed_password = generate_password_hash(password)
+        self.hashed_password = password
 
     # Проверить пароль
     def check_password(self, password):
         return check_password_hash(self.hashed_password, password)
 
+    def auth(self, password):
+        if self.check_password(password):
+            token = jwt.encode({"user_id": self.id,
+                                "exp": datetime.datetime.now() + datetime.timedelta(hours=1)}, SECRET_WORD)
+            self.token = token
 
-class ChatileAnonymousUser:
-    # Класс анонимного пользователя с заглушками. Нужен для внутренней работы Flask-Login
-    @property
-    def is_active(self):
-        return False
+            return AuthPacket(token)
+        return BadLoginErrorPacket("Bad login: invalid password")
 
-    @property
-    def is_authenticated(self):
-        return False
+    def check_token(self, token):
+        if not self.token:
+            return False
 
-    @property
-    def is_anonymous(self):
-        return True
+        try:
+            data = jwt.decode(self.token, SECRET_WORD)
+        except jwt.ExpiredSignatureError:
+            return False
 
-    def get_id(self):
-        return None
+        if data and "user_id" in data and data["user_id"] == self.id:
+            return True
 
-    def set_password(self, password):
-        return
-
-    def check_password(self, password):
         return False
