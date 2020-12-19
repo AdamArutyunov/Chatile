@@ -32,7 +32,7 @@ pack = {
 
 Вход
 pack = {
-	"header" : "Enter",
+	"header" : "login",
 	"login" : ,
 	"password" : ,
 }
@@ -46,13 +46,13 @@ pack = {
 	]
 }
 
-Вход в чат
-pack = {
-	"header" : "Enter_chat",
-	"AllRead" : ,
-	"chatName" : ,
-	"Username" : ,
-}
 
 Получить запросы по логину
 Онлайн, оффлайн
+
+pack = {
+	"token":
+	"header" : "get_messages"
+	"login": ""
+}
+
