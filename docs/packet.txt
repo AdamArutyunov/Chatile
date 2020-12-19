@@ -1,0 +1,58 @@
+Сообщение
+pack = {
+	"header": "send_message", 
+	"id" : ,
+	"text" : ,
+	"sending_date" : ,
+	"sender_login" : ,
+	"recipient_id" : ,
+}
+
+Ошибка
+pack = {
+	"header" : "error", 
+	"error_type" : ,
+	"message": 
+}
+
+
+
+Регистрация
+pack = {
+	"header" : "register", 
+	"name" : ,
+	"login" : ,
+	"password" : ,
+}
+
+Ответ OK
+pack = {
+	"header": "ok",
+}
+
+Вход
+pack = {
+	"header" : "Enter",
+	"login" : ,
+	"password" : ,
+}
+
+Новые сообщения
+pack = {
+	"header" : "new_message",
+	[
+	"chatName" : ,
+	"Username" : ,
+	]
+}
+
+Вход в чат
+pack = {
+	"header" : "Enter_chat",
+	"AllRead" : ,
+	"chatName" : ,
+	"Username" : ,
+}
+
+Получить запросы по логину
+Онлайн, оффлайн
