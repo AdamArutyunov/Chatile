@@ -32,7 +32,7 @@ pack = {
 
 Вход
 pack = {
-	"header" : "Enter",
+	"header" : "login",
 	"login" : ,
 	"password" : ,
 }
