@@ -35,6 +35,10 @@ class RequestHandler:
                 login = body['login']
                 password = body['password']
 
+                user = session.query(User).filter(User.login == login).first()
+                if user:
+                    return BadRegisterErrorPacket("Bad register: login exists")
+
                 user = User()
                 user.name = name
                 user.login = login
