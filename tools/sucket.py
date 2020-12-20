@@ -1,15 +1,78 @@
 import socket
+import bcrypt
+import json
 
 sock = socket.socket()
 sock.connect(('localhost', 1234))
+'''
+print(bcrypt.hashpw('adam'.encode('utf8'), bcrypt.gensalt()))
 
-for i in range(2):
-    a = bytes('{"body":{"name":"stepkaaa","login":"stepanfffffff7kek","password":"$2a$14$t542x1V2NLsoZDr/pUDSL.PuhEIal5BnYCzQeSPTWh/rB4CwWi/wS","Addr":""},"header":"register"}', encoding='utf-8')
-    sock.send(a)
-    data = sock.recv(1024)
-    print(data)
+data = {
+    "body": {
+        "name": "Adam Arutyunov",
+        "login": "adam",
+        "password": "$2b$12$pqoAR8vEXdkUQLsnOsFmrO01bfxG2SVxSiDBiA1RyPUXxpVU7zLtG"},
+    "header": "register"
+    }
+
+a = json.dumps(data).encode('utf8')
+sock.send(a)
+data = sock.recv(1024)
+response = json.loads(data)
+print(response)
+'''
+
+data = {
+    "body": {
+        "name": "Adam Arutyunov",
+        "login": "adam",
+        "password": "adam"},
+    "header": "login"
+    }
+
+a = json.dumps(data).encode('utf8')
+sock.send(a)
+data = sock.recv(1024)
+response = json.loads(data)
+print(response)
+
+
+'''
+token = response['body']['token']
+print(token)
+
+data = {'header': "send_message",
+        "body": {
+            "token": token,
+            "data": "hello motherfucker",
+            "recipient_login": "adam"
+            }
+        }
+
+a = json.dumps(data).encode('utf8')
+
+sock.send(a)
+data = sock.recv(1024)
+response = json.loads(data)
+print(response)'''
+
+
+token = response['body']['token']
+print(token)
+
+data = {'header': "get_messages",
+        "body": {
+            "token": token,
+            "login": "adam"
+            }
+        }
+
+a = json.dumps(data).encode('utf8')
+
+sock.send(a)
+data = sock.recv(1024)
+response = json.loads(data)
+print(response)
 
 
 sock.close()
-
-print(data)

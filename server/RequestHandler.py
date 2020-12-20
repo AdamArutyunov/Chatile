@@ -47,7 +47,10 @@ class RequestHandler:
                 session.add(user)
                 session.commit()
 
-                return user.auth()
+                result = user.auth()
+                session.commit()
+
+                return result
 
             if header == Headers.LOGIN:
                 login = body['login']
@@ -57,7 +60,10 @@ class RequestHandler:
                 if not user:
                     return BadLoginErrorPacket("Bad login: invalid login")
 
-                return user.check_auth(password)
+                result = user.check_auth(password)
+                session.commit()
+
+                return result
 
             if header == Headers.SEND_MESSAGE:
                 token = body['token']
@@ -94,7 +100,7 @@ class RequestHandler:
                     return BadTokenErrorPacket()
 
                 login = body['login']
-                recipient = session.query(User).get(User.login == login)
+                recipient = session.query(User).filter(User.login == login).first()
 
                 if not recipient:
                     return BadRequestErrorPacket("user does not exist")
@@ -113,5 +119,8 @@ class RequestHandler:
                 return MessageBatchPacket(user.login, recipient.login,
                                           formatted_messages)
 
+            return BadRequestErrorPacket('invalid header')
+
         except Exception as e:
+            raise e
             return BadRequestErrorPacket(e)
