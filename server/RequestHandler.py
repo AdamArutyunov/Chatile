@@ -116,8 +116,7 @@ class RequestHandler:
                                                'data': message.data,
                                                'sending_date': int(message.sending_date.timestamp())})
 
-                return MessageBatchPacket(user.login, recipient.login,
-                                          formatted_messages)
+                return MessageBatchPacket(user.login)
 
             return BadRequestErrorPacket('invalid header')
 

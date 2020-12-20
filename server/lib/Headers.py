@@ -7,3 +7,4 @@ class Headers:
     AUTH = "auth"
     GET_MESSAGES = "get_messages"
     MESSAGES = "messages"
+    MESSAGE = "message"
