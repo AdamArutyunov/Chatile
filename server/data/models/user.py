@@ -39,17 +39,18 @@ class User(SqlAlchemyBase, UserMixin, SerializerMixin):
                               self.hashed_password.encode(encoding='utf-8'))
 
     def check_auth(self, password):
+        print("Checking")
         if self.check_password(password):
             self.auth()
             return AuthPacket(self.token)
         return BadLoginErrorPacket("Bad login: invalid password")
 
     def check_token(self, token):
-        if not self.token:
+        if not token:
             return False
 
         try:
-            token = self.token.encode('utf-8')
+            token = token.encode('utf-8')
             data = jwt.decode(token, SECRET_WORD)
         except jwt.ExpiredSignatureError:
             return False
@@ -60,8 +61,13 @@ class User(SqlAlchemyBase, UserMixin, SerializerMixin):
         return False
 
     def auth(self):
+        print("Authing")
         token = jwt.encode({"user_id": self.id,
                             "exp": datetime.datetime.now() + datetime.timedelta(hours=1)}, SECRET_WORD)
         self.token = token.decode('utf-8')
+        print(self.token)
+        print(token)
+        print(self.id)
+        print(self.login)
 
         return AuthPacket(self.token)

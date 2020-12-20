@@ -79,6 +79,19 @@ OK
 }
 
 
+Новое сообщение
+
+{
+  'header': 'message',
+  'body': {
+      'sender_login': <str>,
+      'recipient_login': <str>,
+      'data': <str>,
+      'sending_date': <int> (UNIX time)
+  }
+}
+
+
 История сообщений
 
 {

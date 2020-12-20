@@ -4,43 +4,87 @@ from RequestHandler import *
 from lib.Packets import *
 from random import randint
 
+import threading
+import socket
+import argparse
+import os
 
-print("Creating socket...")
-sock = socket.socket()
-print("Socket created")
 
-print("Configuring...")
-sock.bind(('0.0.0.0', APP_PORT))
-sock.listen(1000)
+class Server(threading.Thread):
+    def __init__(self, host, port):
+        super().__init__()
+        self.connections = []
+        self.host = host
+        self.port = port
+
+    def run(self):
+        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        sock.bind((self.host, self.port))
+
+        sock.listen(100)
+        #print('Listening at', sock.getsockname())
+
+        while True:
+            sc, sockname = sock.accept()
+            #print('Accepted a new connection from {} to {}'.format(sc.getpeername(), sc.getsockname()))
+
+            server_socket = ServerSocket(sc, sockname, self)
+            server_socket.start()
+
+            self.connections.append(server_socket)
+            #print('Ready to receive messages from', sc.getpeername())
+
+    def broadcast(self, message, source):
+        for connection in self.connections:
+            if connection.sockname != source:
+                connection.send(message)
+
+    def remove_connection(self, connection):
+        self.connections.remove(connection)
+
+
+class ServerSocket(threading.Thread):
+    def __init__(self, sc, sockname, server):
+        super().__init__()
+        self.sc = sc
+        self.sockname = sockname
+        self.server = server
+
+    def run(self):
+        while True:
+            message = self.sc.recv(999999)
+            if message:
+                #print('{} says {!r}'.format(self.sockname, message))
+
+                try:
+                    decoded_request = message.decode(encoding="utf-8")
+                    request = json.loads(decoded_request)
+                    #print("Success.")
+                except Exception as e:
+                    #print("Error.")
+                    self.send(SyntaxErrorPacket().to_bytes())
+                    continue
+
+                response = ChatileRequestHandler.handle_request(request)
+                #print(f"Response is {response.to_bytes().decode(encoding='utf-8')}")
+
+                self.send(response.to_bytes())
+
+            else:
+                #print('{} has closed the connection'.format(self.sockname))
+                self.sc.close()
+                server.remove_connection(self)
+                return
+
+    def send(self, message):
+        self.sc.sendall(message)
+
 
 ChatileRequestHandler = RequestHandler()
 
-print("Starting server...")
-while True:
-    connection, address = sock.accept()
-    print(f"Accepted connection on {address[0]}")
+server = Server('0.0.0.0', APP_PORT)
+server.start()
 
-    data = connection.recv(1024)
-    print(f"New data: {data}")
-
-    if not data:
-        print("No data...")
-        connection.close()
-        continue
-
-    print("Trying to decode request...")
-    try:
-        decoded_request = data.decode(encoding="utf-8")
-        request = json.loads(decoded_request)
-        print("Success.")
-    except Exception as e:
-        print("Error.")
-        connection.send(SyntaxErrorPacket().to_bytes())
-        connection.close()
-        continue
-
-    response = ChatileRequestHandler.handle_request(request)
-    print(f"Response is {response.to_bytes().decode(encoding='utf-8')}")
-
-    connection.send(response.to_bytes())
-    connection.close()
+exit = threading.Thread(target=exit, args=(server,))
+exit.start()

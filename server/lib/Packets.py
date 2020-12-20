@@ -1,5 +1,6 @@
 import json
 from lib.Headers import *
+from data.models.message import *
 
 
 class Packet:
@@ -56,6 +57,14 @@ class AuthPacket(Packet):
         super().__init__({'header': Headers.AUTH, 'body': {'token': token}})
 
 
+class MessagePacket(Packet):
+    def __init__(self, message: Message):
+        super().__init__({'header': Headers.MESSAGE, 'body': {'sender_login': message.sender.login,
+                                                              'recipient_login': message.recipient.login,
+                                                              'data': message.data,
+                                                              'sending_date': int(message.sending_date.timestamp())}})
+
+
 class MessageBatchPacket(Packet):
-    def __init__(self, sender_login: str, recipient_login: str, messages: list):
+    def __init__(self, messages: list):
         super().__init__({'header': Headers.MESSAGES, 'body': {'messages': messages}})
