@@ -22,7 +22,7 @@ class Server(threading.Thread):
         sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         sock.bind((self.host, self.port))
 
-        sock.listen(1)
+        sock.listen(100)
         #print('Listening at', sock.getsockname())
 
         while True:
@@ -53,7 +53,7 @@ class ServerSocket(threading.Thread):
 
     def run(self):
         while True:
-            message = self.sc.recv(1024)
+            message = self.sc.recv(999999)
             if message:
                 #print('{} says {!r}'.format(self.sockname, message))
 
