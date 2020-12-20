@@ -22,7 +22,7 @@ class Server(threading.Thread):
         sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         sock.bind((self.host, self.port))
 
-        sock.listen(100)
+        sock.listen(1000)
         #print('Listening at', sock.getsockname())
 
         while True:
@@ -53,7 +53,7 @@ class ServerSocket(threading.Thread):
 
     def run(self):
         while True:
-            message = self.sc.recv(999999)
+            message = self.sc.recv(9999999)
             if message:
                 #print('{} says {!r}'.format(self.sockname, message))
 
@@ -63,7 +63,7 @@ class ServerSocket(threading.Thread):
                     #print("Success.")
                 except Exception as e:
                     #print("Error.")
-                    self.send(SyntaxErrorPacket().to_bytes())
+                    self.sendall(SyntaxErrorPacket().to_bytes())
                     continue
 
                 response = ChatileRequestHandler.handle_request(request)
