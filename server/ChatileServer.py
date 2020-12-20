@@ -22,7 +22,7 @@ class Server(threading.Thread):
         sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         sock.bind((self.host, self.port))
 
-        sock.listen(100)
+        sock.listen(1000)
         #print('Listening at', sock.getsockname())
 
         while True:

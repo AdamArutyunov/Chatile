@@ -3,21 +3,29 @@ import bcrypt
 import json
 import datetime
 import threading
+import colorama
+from colorama import *
 from time import sleep
 
+colorama.init()
 RUN_UPDATE = False
 
 
 def update(token, login):
     messages = set()
     while RUN_UPDATE:
-        all_messages = send_request(build_get_messages(token, login))['body']['messages']
-        sleep(0.1)
-        new_messages = all_messages[len(messages):]
-        for message in new_messages:
-            print(*format_message(message))
+        try:
+            all_messages = send_request(build_get_messages(token, login))['body']['messages']
+            sleep(0.1)
+            new_messages = all_messages[len(messages):]
+            print(Fore.GREEN + Back.BLACK + Style.BRIGHT, end='')
+            for message in new_messages:
+                print(*format_message(message))
+            print(Fore.YELLOW + Back.BLACK + Style.BRIGHT, end='')
 
-        messages = all_messages
+            messages = all_messages
+        except Exception as e:
+            continue
 
 
 def build_register(name, login, password):
@@ -71,7 +79,7 @@ def build_get_messages(token, login):
 
 
 def send_request(data):
-    string_data = json.dumps(data)
+    string_data = json.dumps(data, ensure_ascii=False)
     bytes_data = string_data.encode('utf8')
 
     sock.send(bytes_data)
@@ -81,8 +89,8 @@ def send_request(data):
 
 
 def format_message(message):
-    return (datetime.datetime.fromtimestamp(message['sending_date']).strftime("[%d.%m.%Y %H:%M]"),
-            message['sender_login'], '->', message['recipient_login'], "\t\t", message['data'])
+    return (datetime.datetime.fromtimestamp(message['sending_date']).strftime("(%d.%m.%Y %H:%M)"),
+            message['sender_login'], "\t\t", message['data'])
 
 
 sock = socket.socket()
@@ -92,28 +100,35 @@ while True:
     logged = False
     token = None
 
+    print(Fore.CYAN + Back.BLACK + Style.BRIGHT)
     print("Добро пожаловать в Chatile.")
     print("Доступные команды:")
     print("login: вход в систему")
     print("register: регистрация")
 
+    print(Back.MAGENTA + Fore.WHITE)
     command = input(">>> ").strip()
     while command not in ["login", "register"]:
         command = input(">>> ").strip()
 
     while not logged:
         if command == "login":
+            print(Back.RED + Fore.WHITE)
             login = input("Введите логин:\n>>> ")
             password = input("Введите пароль:\n>>> ")
 
+            print(Fore.CYAN + Back.BLACK + Style.BRIGHT)
+            print("Подключаемся...")
             response = send_request(build_login(login, password))
             if response['header'] != 'error':
                 token = response['body']['token']
                 logged = True
+                print(Back.GREEN + Fore.WHITE + "Успешная авторизация!")
             else:
-                print(response['body']['message'])
+                print(Back.RED + Fore.WHITE + "Неверный логин или пароль!")
 
         elif command == 'register':
+            print(Back.RED + Fore.WHITE)
             login = input("Введите логин:\n>>> ")
             password = input("Введите пароль:\n>>> ")
             name = input("Введите имя:\n>>> ")
@@ -126,23 +141,30 @@ while True:
                 print(response['body']['message'])
 
     while True:
+        print(Back.CYAN + Fore.WHITE)
         print("Введите логин человека, с которым хотите пообщаться:")
-        recipient_login = input()
+        print(Back.MAGENTA + Fore.WHITE)
+        recipient_login = input(">>> ")
 
+        print(Fore.CYAN + Back.BLACK + Style.BRIGHT)
+        print("Устанавливаем соединение...")
         response = send_request(build_get_messages(token, recipient_login))
+
+        if response['header'] == 'error':
+            print(Back.RED + Fore.WHITE)
+            print("Мы не нашли пользователя с таким логином.")
+            continue
 
         RUN_UPDATE = True
         update_thread = threading.Thread(target=lambda: update(token, recipient_login))
         update_thread.start()
 
-        if response['header'] == 'error':
-            print(response['body']['message'])
-        else:
-            for message in response['body']['messages']:
-                #print(*format_message(message))
-                pass
+        print("Соединение установлено. Приятного общения!")
+
+        print(Fore.GREEN + Back.BLACK + Style.BRIGHT)
 
         while True:
+            print(Fore.YELLOW + Back.BLACK + Style.BRIGHT, end='')
             message_text = input()
             if message_text == 'q':
                 break
