@@ -82,6 +82,7 @@ class RequestHandler:
                 if not data:
                     return BadRequestErrorPacket("message is empty")
 
+
                 message = Message()
                 message.sender = user
                 message.recipient = recipient

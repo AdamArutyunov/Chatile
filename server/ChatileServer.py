@@ -23,17 +23,17 @@ class Server(threading.Thread):
         sock.bind((self.host, self.port))
 
         sock.listen(1)
-        print('Listening at', sock.getsockname())
+        #print('Listening at', sock.getsockname())
 
         while True:
             sc, sockname = sock.accept()
-            print('Accepted a new connection from {} to {}'.format(sc.getpeername(), sc.getsockname()))
+            #print('Accepted a new connection from {} to {}'.format(sc.getpeername(), sc.getsockname()))
 
             server_socket = ServerSocket(sc, sockname, self)
             server_socket.start()
 
             self.connections.append(server_socket)
-            print('Ready to receive messages from', sc.getpeername())
+            #print('Ready to receive messages from', sc.getpeername())
 
     def broadcast(self, message, source):
         for connection in self.connections:
@@ -55,24 +55,24 @@ class ServerSocket(threading.Thread):
         while True:
             message = self.sc.recv(1024)
             if message:
-                print('{} says {!r}'.format(self.sockname, message))
+                #print('{} says {!r}'.format(self.sockname, message))
 
                 try:
                     decoded_request = message.decode(encoding="utf-8")
                     request = json.loads(decoded_request)
-                    print("Success.")
+                    #print("Success.")
                 except Exception as e:
-                    print("Error.")
+                    #print("Error.")
                     self.send(SyntaxErrorPacket().to_bytes())
                     continue
 
                 response = ChatileRequestHandler.handle_request(request)
-                print(f"Response is {response.to_bytes().decode(encoding='utf-8')}")
+                #print(f"Response is {response.to_bytes().decode(encoding='utf-8')}")
 
                 self.send(response.to_bytes())
 
             else:
-                print('{} has closed the connection'.format(self.sockname))
+                #print('{} has closed the connection'.format(self.sockname))
                 self.sc.close()
                 server.remove_connection(self)
                 return

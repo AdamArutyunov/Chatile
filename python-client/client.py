@@ -3,13 +3,16 @@ import bcrypt
 import json
 import datetime
 import threading
-
+from time import sleep
 
 RUN_UPDATE = False
+
+
 def update(token, login):
     messages = set()
     while RUN_UPDATE:
         all_messages = send_request(build_get_messages(token, login))['body']['messages']
+        sleep(0.1)
         new_messages = all_messages[len(messages):]
         for message in new_messages:
             print(*format_message(message))
@@ -42,12 +45,12 @@ def build_login(login, password):
     return data
 
 
-def build_send_message(token, data, recipient_login):
+def build_send_message(token, message_data, recipient_login):
     data = {
         'header': "send_message",
         "body": {
             "token": token,
-            "data": data,
+            "data": message_data,
             "recipient_login": recipient_login
         }
      }
@@ -72,7 +75,7 @@ def send_request(data):
     bytes_data = string_data.encode('utf8')
 
     sock.send(bytes_data)
-    response = sock.recv(1024)
+    response = sock.recv(10240)
     response_data = json.loads(response)
     return response_data
 
@@ -124,28 +127,30 @@ while True:
 
     while True:
         print("Введите логин человека, с которым хотите пообщаться:")
-        login = input()
+        recipient_login = input()
 
-        response = send_request(build_get_messages(token, login))
+        response = send_request(build_get_messages(token, recipient_login))
 
         RUN_UPDATE = True
-        update_thread = threading.Thread(target=lambda: update(token, login))
+        update_thread = threading.Thread(target=lambda: update(token, recipient_login))
         update_thread.start()
 
         if response['header'] == 'error':
             print(response['body']['message'])
         else:
             for message in response['body']['messages']:
-                print(*format_message(message))
+                #print(*format_message(message))
+                pass
 
         while True:
-            command = input()
-            if command == 'q':
+            message_text = input()
+            if message_text == 'q':
                 break
 
-            send_request(build_send_message(token, command, login))
+            send_request(build_send_message(token, message_text, recipient_login))
 
-            #response = send_request(build_get_messages(token, login))
+            #response = send_request(build_get_messages(token, recipient_login))
+            #print(response)
             #print(*format_message(response['body']['messages'][-1]))
 
         RUN_UPDATE = False

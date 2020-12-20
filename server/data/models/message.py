@@ -18,11 +18,12 @@ class Message(SqlAlchemyBase, SerializerMixin):
     data = Column(String, nullable=False)
 
     # Отправитель
-    user_id = Column(Integer, ForeignKey("users.id"))
-    sender = orm.relation("User")
+    sender_id = Column(Integer, ForeignKey("users.id"))
+    sender = orm.relation("User", foreign_keys=[sender_id])
 
     # Получатель
-    recipient = orm.relation("User")
+    recipient_id = Column(Integer, ForeignKey("users.id"))
+    recipient = orm.relation("User", foreign_keys=[recipient_id])
 
     # Дата отправки
     sending_date = Column(DateTime, default=datetime.datetime.now)
