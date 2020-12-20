@@ -53,7 +53,7 @@ class ServerSocket(threading.Thread):
 
     def run(self):
         while True:
-            message = self.sc.recv(9999999)
+            message = self.sc.recv(999999)
             if message:
                 #print('{} says {!r}'.format(self.sockname, message))
 
@@ -63,7 +63,7 @@ class ServerSocket(threading.Thread):
                     #print("Success.")
                 except Exception as e:
                     #print("Error.")
-                    self.sendall(SyntaxErrorPacket().to_bytes())
+                    self.send(SyntaxErrorPacket().to_bytes())
                     continue
 
                 response = ChatileRequestHandler.handle_request(request)

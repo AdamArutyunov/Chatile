@@ -79,7 +79,7 @@ def build_get_messages(token, login):
 
 
 def send_request(data):
-    string_data = json.dumps(data)
+    string_data = json.dumps(data, ensure_ascii=False)
     bytes_data = string_data.encode('utf8')
 
     sock.send(bytes_data)

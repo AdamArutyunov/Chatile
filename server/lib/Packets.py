@@ -8,7 +8,7 @@ class Packet:
         self.data = data
 
     def to_bytes(self):
-        string_data = json.dumps(self.data)
+        string_data = json.dumps(self.data, ensure_ascii=False)
         bytes_data = bytes(string_data, encoding="utf-8")
 
         return bytes_data
