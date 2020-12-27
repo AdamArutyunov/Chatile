@@ -27,7 +27,7 @@ func (h *ConnectionHandler) closeConnection() {
 func (h *ConnectionHandler) Send(data []byte) error {
 	err := h.openConnection()
 	if err != nil {
-		return nil
+		return err
 	}
 	_, err = h.connection.Write(data)
 	if err != nil {
