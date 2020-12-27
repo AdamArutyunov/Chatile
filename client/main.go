@@ -33,6 +33,10 @@ func main() {
 			fmt.Println("Hello, user")
 			return nil
 		}},
+		{"logout", func(s *menu.State, menuDict map[string]menu.Menu) error {
+			s.SetMenu(menuDict["mainMenu"])
+			return nil
+		}},
 	}}
 
 	state.SetMenu(mainMenu)
