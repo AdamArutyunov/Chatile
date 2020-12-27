@@ -73,14 +73,19 @@ func main() {
 		printCommands(m.Commands)
 		var input string
 		_, _ = fmt.Scanln(&input)
-
+		found := false
 		for _, command := range m.Commands {
+
 			if input == command.Name {
+				found = true
 				err := command.Handler(&state, state.MenuDict)
 				if err != nil {
 					color.Red(err.Error())
 				}
 			}
+		}
+		if !found{
+			color.Red("Такой команды нет :( Повторите попытку")
 		}
 	}
 
