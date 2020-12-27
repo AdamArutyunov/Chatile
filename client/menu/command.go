@@ -4,6 +4,6 @@ package menu
 type action func(s *State, menuDict map[string]Menu) error
 
 type Command struct {
-	Name string
+	Name    string
 	Handler action
 }
