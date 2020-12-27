@@ -7,7 +7,6 @@ import (
 	"errors"
 	"fmt"
 	"github.com/fatih/color"
-	"strings"
 )
 
 func main() {
@@ -20,14 +19,17 @@ func main() {
 				fmt.Println("help command")
 				return nil
 			}},
-			{"login", func(s *menu.State, menuDict map[string]menu.Menu) error {
-				var password string
-				_, _ = fmt.Scanln(&password)
-				if strings.TrimSuffix(password, "\n") != "123321" {
-					return errors.New("wrong password")
+			{Name: "login", Handler: func(s *menu.State, menuDict map[string]menu.Menu) error {
+				var login, password string
+				ask(&login, "login")
+				ask(&password, "password")
+				ok, err := user.Login(login, password, handler)
+				if err != nil{
+					return err
 				}
-				fmt.Println("Успешная авторизация")
-				s.SetMenu(menuDict["loggedMenu"])
+				if ok{
+					s.SetMenu(menuDict["loggedMenu"])
+				}
 				return nil
 
 			}},
