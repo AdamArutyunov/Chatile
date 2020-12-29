@@ -7,10 +7,28 @@ import (
 	"errors"
 	"fmt"
 	"github.com/fatih/color"
+	"log"
+	"os"
+	"os/signal"
+	"syscall"
 )
 
 func main() {
 	handler := tcp.ConnectionHandler{}
+	err := handler.OpenConnection()
+	if err != nil {
+		log.Fatalln(err)
+	}
+	defer handler.CloseConnection()
+
+	// handle ctrl c
+	c := make(chan os.Signal)
+	signal.Notify(c, os.Interrupt, syscall.SIGTERM)
+	go func() {
+		<-c
+		shutdown(handler)
+		os.Exit(1)
+	}()
 
 	state := menu.State{MenuDict: map[string]menu.Menu{}}
 	mainMenu := menu.Menu{
@@ -23,11 +41,12 @@ func main() {
 				var login, password string
 				ask(&login, "login")
 				ask(&password, "password")
-				ok, err := user.Login(login, password, handler)
+				ok, profile, err := user.Login(login, password, handler)
 				if err != nil{
 					return err
 				}
 				if ok{
+					s.Profile = profile
 					s.SetMenu(menuDict["loggedMenu"])
 				}
 				return nil
@@ -56,9 +75,11 @@ func main() {
 	loggedMenu := menu.Menu{Commands: []menu.Command{
 		{"test", func(s *menu.State, menuDict map[string]menu.Menu) error {
 			fmt.Println("Hello, user")
+			fmt.Println(s.Profile)
 			return nil
 		}},
 		{"logout", func(s *menu.State, menuDict map[string]menu.Menu) error {
+			s.Profile = user.Profile{}
 			s.SetMenu(menuDict["mainMenu"])
 			return nil
 		}},
@@ -103,4 +124,9 @@ func printCommands(commands []menu.Command) {
 		color.Yellow(command.Name)
 	}
 	fmt.Println("==============")
+}
+
+func shutdown(handler tcp.ConnectionHandler) {
+	fmt.Println("Shutdown")
+	handler.CloseConnection()
 }

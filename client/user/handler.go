@@ -3,7 +3,7 @@ package user
 import (
 	"client/tcp"
 	"encoding/json"
-	"fmt"
+	"github.com/fatih/color"
 )
 
 func Register(profile Profile, handler tcp.ConnectionHandler) error {
@@ -19,17 +19,28 @@ func Register(profile Profile, handler tcp.ConnectionHandler) error {
 	return nil
 }
 
-func Login(login, password string, handler tcp.ConnectionHandler) (bool, error){
-	var ans string
+func Login(login, password string, handler tcp.ConnectionHandler) (bool, Profile, error){
+	var p Profile
 	data, err := json.Marshal(map[string]interface{}{"header": "login", "body": map[string]string{"login": login, "password": password}})
 	if err != nil {
-		return false, err
+		return false, p, err
 	}
 	err = handler.Send(data)
 	if err != nil {
-		return false, err
+		return false, p, err
 	}
-	ans, err = handler.ReadReply()
-	fmt.Println(ans)
-	return true, nil
+	ans, err := handler.ReadReply()
+	if err != nil{
+		return false, p, nil
+	}
+	if ans.Header == "error"{
+		color.Red("Ошибка авторизации")
+		return false, p, nil
+	}
+	token, ok := ans.Body["token"].(string)
+	if !ok{
+		return false, p, nil
+	}
+	p.Login, p.Password, p.Token =  login, password, token
+	return true, p, nil
 }

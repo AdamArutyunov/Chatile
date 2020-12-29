@@ -1,7 +1,7 @@
 package tcp
 
 import (
-	"io/ioutil"
+	"encoding/json"
 	"net"
 )
 
@@ -10,7 +10,12 @@ type ConnectionHandler struct {
 	connection net.Conn
 }
 
-func (h *ConnectionHandler) openConnection() error {
+type Answer struct {
+	Header string `json:"header"`
+	Body map[string]interface{}
+}
+
+func (h *ConnectionHandler) OpenConnection() error {
 	var err error
 	h.connector = *NewConnector()
 	h.connection, err = h.connector.Connect()
@@ -20,27 +25,23 @@ func (h *ConnectionHandler) openConnection() error {
 	return nil
 }
 
-func (h *ConnectionHandler) closeConnection() {
+func (h *ConnectionHandler) CloseConnection() {
 	_ = h.connection.Close()
 }
 
 func (h *ConnectionHandler) Send(data []byte) error {
-	err := h.openConnection()
-	if err != nil {
-		return err
-	}
-	_, err = h.connection.Write(data)
+	_, err := h.connection.Write(data)
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
-func (h *ConnectionHandler) ReadReply() (string, error) {
-	message, err := ioutil.ReadAll(h.connection)
-	if err != nil {
-		return "", err
+func (h *ConnectionHandler) ReadReply() (Answer, error) {
+	var ans Answer
+	err := json.NewDecoder(h.connection).Decode(&ans)
+	if err != nil{
+		return ans, err
 	}
-	h.closeConnection()
-	return string(message), nil
+	return ans, nil
 }
