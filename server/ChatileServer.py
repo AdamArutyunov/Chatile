@@ -43,6 +43,9 @@ class Server(threading.Thread):
     def remove_connection(self, connection):
         self.connections.remove(connection)
 
+    def get_connections_by_user(self, user):
+        return list(filter(lambda x: x.user and x.user.login == user.login, self.connections))
+
 
 class ServerSocket(threading.Thread):
     def __init__(self, sc, sockname, server):
@@ -50,6 +53,8 @@ class ServerSocket(threading.Thread):
         self.sc = sc
         self.sockname = sockname
         self.server = server
+
+        self.user = None
 
     def run(self):
         while True:
@@ -66,7 +71,7 @@ class ServerSocket(threading.Thread):
                     self.send(SyntaxErrorPacket().to_bytes())
                     continue
 
-                response = ChatileRequestHandler.handle_request(request)
+                response = ChatileRequestHandler.handle_request(request, socket)
                 #print(f"Response is {response.to_bytes().decode(encoding='utf-8')}")
 
                 self.send(response.to_bytes())
@@ -81,9 +86,9 @@ class ServerSocket(threading.Thread):
         self.sc.sendall(message)
 
 
-ChatileRequestHandler = RequestHandler()
-
 server = Server('0.0.0.0', APP_PORT)
+ChatileRequestHandler = RequestParser(server)
+
 server.start()
 
 exit = threading.Thread(target=exit, args=(server,))

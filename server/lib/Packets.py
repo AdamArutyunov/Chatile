@@ -1,6 +1,7 @@
 import json
 from lib.Headers import *
 from data.models.message import *
+from data.models.user import *
 
 
 class Packet:
@@ -67,4 +68,12 @@ class MessagePacket(Packet):
 
 class MessageBatchPacket(Packet):
     def __init__(self, messages: list):
-        super().__init__({'header': Headers.MESSAGES, 'body': {'messages': messages}})
+        super().__init__({'header': Headers.MESSAGE_BATCH, 'body': {'messages': messages}})
+
+
+class UserPacket(Packet):
+    def __init__(self, user: User):
+        super().__init__({'header': Headers.USER, 'body': {'login': user.login,
+                                                           'name': user.name,
+                                                           'registration_date': int(user.registration_date.timestamp()),
+                                                           'last_online_data': int(user.last_online_date.timestamp())}})
