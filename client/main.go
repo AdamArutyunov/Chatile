@@ -94,6 +94,9 @@ func main() {
 		printCommands(m.Commands)
 		var input string
 		_, _ = fmt.Scanln(&input)
+		if input == "q" || input == "quit" {
+			os.Exit(0)
+		}
 		found := false
 		for _, command := range m.Commands {
 
