@@ -95,6 +95,7 @@ func main() {
 		var input string
 		_, _ = fmt.Scanln(&input)
 		if input == "q" || input == "quit" {
+			handler.CloseConnection()
 			os.Exit(0)
 		}
 		found := false
