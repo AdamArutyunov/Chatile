@@ -16,10 +16,8 @@ class User(SqlAlchemyBase, UserMixin, SerializerMixin):
     # Модель пользователя
     __tablename__ = 'users'
 
-    # ID пользователя
-    id = Column(Integer, primary_key=True, autoincrement=True)
     # Логин
-    login = Column(String, nullable=False, unique=True)
+    login = Column(String, nullable=False, primary_key=True)
     # Отображаемое имя
     name = Column(String, nullable=False)
     # Хэшированный пароль
@@ -28,6 +26,8 @@ class User(SqlAlchemyBase, UserMixin, SerializerMixin):
     registration_date = Column(DateTime, default=datetime.datetime.now)
     # Токен авторизации
     token = Column(String, nullable=True)
+    # Дата последнего онлайна
+    last_online_date = Column(DateTime, default=datetime.datetime.now)
 
     # Установить пароль
     def set_password(self, password):
@@ -39,7 +39,6 @@ class User(SqlAlchemyBase, UserMixin, SerializerMixin):
                               self.hashed_password.encode(encoding='utf-8'))
 
     def check_auth(self, password):
-        print("Checking")
         if self.check_password(password):
             self.auth()
             return AuthPacket(self.token)
@@ -55,19 +54,18 @@ class User(SqlAlchemyBase, UserMixin, SerializerMixin):
         except jwt.ExpiredSignatureError:
             return False
 
-        if data and "user_id" in data and data["user_id"] == self.id:
+        if data and "user_login" in data and data["user_login"] == self.login:
             return True
 
         return False
 
     def auth(self):
-        print("Authing")
-        token = jwt.encode({"user_id": self.id,
+        token = jwt.encode({"user_login": self.login,
                             "exp": datetime.datetime.now() + datetime.timedelta(hours=1)}, SECRET_WORD)
         self.token = token.decode('utf-8')
-        print(self.token)
-        print(token)
-        print(self.id)
-        print(self.login)
+        self.online()
 
         return AuthPacket(self.token)
+
+    def online(self):
+        self.last_online_date = datetime.datetime.now()
