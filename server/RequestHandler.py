@@ -1,9 +1,9 @@
 import json
 from data import db_session
 from Constants import *
-from lib.Packets import *
 from data.models.user import *
 from data.models.message import *
+from lib.Packets import *
 
 
 def get_user_by_token(token):
@@ -23,7 +23,7 @@ class RequestParser:
     def __init__(self, server):
         db_session.global_init(DATABASE_URI)
         self.server = server
-        self.request_handler = RequestHandler()
+        self.request_handler = RequestHandler(server)
 
     def handle_request(self, request: dict, socket) -> Packet:
         try:
@@ -36,8 +36,8 @@ class RequestParser:
             if header == Headers.LOGIN:
                 return self.request_handler.login(body, socket)
 
-            if header == Headers.USER:
-                return self.request_handler.user(body, socket)
+            if header == Headers.GET_USER:
+                return self.request_handler.get_user(body, socket)
 
             if header == Headers.ONLINE:
                 return self.request_handler.online(body, socket)
@@ -51,6 +51,7 @@ class RequestParser:
             return BadRequestErrorPacket('invalid header')
 
         except Exception as e:
+            raise e
             return BadRequestErrorPacket(e)
 
 
@@ -182,7 +183,7 @@ class RequestHandler:
 
         return OKPacket()
 
-    def user(self, body, socket):
+    def get_user(self, body, socket):
         session = db_session.create_session()
 
         login = body['login']

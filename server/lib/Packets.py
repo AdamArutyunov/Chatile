@@ -59,7 +59,7 @@ class AuthPacket(Packet):
 
 
 class MessagePacket(Packet):
-    def __init__(self, message: Message):
+    def __init__(self, message):
         super().__init__({'header': Headers.MESSAGE, 'body': {'sender_login': message.sender.login,
                                                               'recipient_login': message.recipient.login,
                                                               'data': message.data,
@@ -72,7 +72,7 @@ class MessageBatchPacket(Packet):
 
 
 class UserPacket(Packet):
-    def __init__(self, user: User):
+    def __init__(self, user):
         super().__init__({'header': Headers.USER, 'body': {'login': user.login,
                                                            'name': user.name,
                                                            'registration_date': int(user.registration_date.timestamp()),

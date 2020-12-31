@@ -10,7 +10,7 @@ CLIENT -> SERVER
      'login': <str>,
      'password': <str>
   }
-}
+} -> Auth
 
 
 Запрос авторизации:
@@ -21,7 +21,7 @@ CLIENT -> SERVER
      'login': <str>,
      'password': <str>
   }
-}
+} -> auth
 
 
 Отправить сообщение:
@@ -33,7 +33,7 @@ CLIENT -> SERVER
      'data': <str>,
      'recipient_login': <str>
   }
-}
+} -> ok
 
 
 Получить всю историю сообщений
@@ -44,7 +44,27 @@ CLIENT -> SERVER
      'token': <str>,
      'login': <str>
   }
-}
+} -> message_batch
+
+
+Обновить онлайн
+
+{
+  'header': 'online',
+  'body': {
+     'token': <str>
+  }
+} -> ok
+
+
+Получить информацию о пользователе
+
+{
+  'header': 'get_user',
+  'body': {
+     'login': <str>
+  }
+} -> user
 
 
 
@@ -95,7 +115,7 @@ OK
 История сообщений
 
 {
-  'header': 'messages',
+  'header': 'message_batch',
   'body': {
      'messages': [
         {
@@ -104,5 +124,18 @@ OK
           'data': <str>,
           'sending_date': <int> (UNIX time)
      ]
+  }
+}
+
+
+Пользователь
+
+{
+  'header': 'user',
+  'body': {
+      'login': <str>,
+      'name': <str>,
+      'registration_date': <int> (UNIX time),
+      'last_online_data': <int> (UNIX time)
   }
 }

@@ -78,6 +78,28 @@ def build_get_messages(token, login):
     return data
 
 
+def build_get_user(login):
+    data = {
+        'header': "get_user",
+        "body": {
+            "login": login
+        }
+    }
+
+    return data
+
+
+def build_online(token):
+    data = {
+        'header': 'online',
+        'body': {
+            'token': token
+        }
+    }
+
+    return data
+
+
 def send_request(data):
     string_data = json.dumps(data, ensure_ascii=False)
     bytes_data = string_data.encode('utf8')
@@ -96,7 +118,12 @@ def format_message(message):
 sock = socket.socket()
 sock.connect(('localhost', 1234))
 
+
+response = send_request(build_get_user('123'))
+print(response)
+
 while True:
+
     logged = False
     token = None
 
