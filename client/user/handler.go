@@ -30,13 +30,9 @@ func Login(login, password string, handler tcp.ConnectionHandler) (bool, Profile
 	if err != nil {
 		return false, p, err
 	}
-	ans, err := handler.ReadReply()
+	req, err := handler.ReadReply()
 	if err != nil {
 		return false, p, nil
-	}
-	req, ok := ans.(request.Req)
-	if !ok{
-		return false, p, errors.New("can't decode req to struct")
 	}
 	if req.Header == "error"{
 		return false, p, request.HandleError(req)
@@ -48,4 +44,24 @@ func Login(login, password string, handler tcp.ConnectionHandler) (bool, Profile
 
 	p.Login, p.Password, p.Token = login, password, authBody.Token
 	return true, p, nil
+}
+
+
+func UpdateOnline(handler tcp.ConnectionHandler, p Profile) error {
+	data, err := json.Marshal(map[string]interface{}{"header": "online", "body": map[string]string{"token": p.Token}})
+	if err != nil{
+		return err
+	}
+	err = handler.Send(data)
+	if err != nil{
+		return err
+	}
+	req, err := handler.ReadReply()
+	if err != nil{
+		return err
+	}
+	if req.Header != "ok"{
+		return request.HandleError(req)
+	}
+	return nil
 }

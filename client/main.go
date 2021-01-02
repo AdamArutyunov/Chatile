@@ -45,6 +45,10 @@ func main() {
 				if err != nil {
 					return err
 				}
+				err = user.UpdateOnline(handler, profile)
+				if err != nil {
+					return err
+				}
 				if ok {
 					s.Profile = profile
 					s.SetMenu(menuDict["loggedMenu"])

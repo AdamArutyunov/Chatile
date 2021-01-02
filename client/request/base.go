@@ -29,7 +29,7 @@ func (r *Req) ParseReq() error{
 			return err
 		}
 	}
-	return errors.New("struct not found to decode")
+	return nil
 }
 
 

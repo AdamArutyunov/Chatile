@@ -33,7 +33,7 @@ func (h *ConnectionHandler) Send(data []byte) error {
 	return nil
 }
 
-func (h *ConnectionHandler) ReadReply() (interface{}, error) {
+func (h *ConnectionHandler) ReadReply() (request.Req, error) {
 	var r request.Req
 	err := json.NewDecoder(h.connection).Decode(&r)
 	if err != nil {
@@ -41,7 +41,7 @@ func (h *ConnectionHandler) ReadReply() (interface{}, error) {
 	}
 	err = r.ParseReq()
 	if err != nil{
-		return nil, err
+		return r, err
 	}
 	return r, nil
 }
