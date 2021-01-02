@@ -46,7 +46,7 @@ func main() {
 				if err != nil {
 					return err
 				}
-				err = user.UpdateOnline(handler, profile)
+				err = user.UpdateOnline(&handler, profile)
 				if err != nil {
 					return err
 				}
@@ -88,13 +88,26 @@ func main() {
 			ask(&recipientLogin, "login with whom you want to chat")
 			chatHandler := chat.CommunicateHandler{
 				Profile: s.Profile,
-				Tcp:     handler,
+				Tcp:     &handler,
 			}
 			messages, err := chatHandler.GetHistory(recipientLogin)
 			if err != nil{
 				return err
 			}
-			chatHandler.PrintMessages(messages)
+			chatHandler.PrintMessages(messages) // print history of correspondence
+			for{
+				var message string
+				fmt.Print("Enter your message: ")
+				_, _ = fmt.Scanln(&message)
+
+				if message == "q" || message == "quit"{
+					break
+				}
+				err = chatHandler.SendMessage(message, recipientLogin)
+				if err != nil{
+					return err
+				}
+			}
 			return nil
 		}},
 		{"logout", func(s *menu.State, menuDict map[string]menu.Menu) error {

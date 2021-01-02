@@ -3,6 +3,7 @@ package chat
 import (
 	"client/request"
 	"client/tcp"
+	"client/tools"
 	"client/user"
 	"encoding/json"
 	"errors"
@@ -12,7 +13,7 @@ import (
 
 type CommunicateHandler struct {
 	Profile user.Profile
-	Tcp tcp.ConnectionHandler
+	Tcp *tcp.ConnectionHandler
 }
 
 func (ch CommunicateHandler) GetHistory(recipientLogin string) ([]request.Message, error){
@@ -33,6 +34,28 @@ func (ch CommunicateHandler) GetHistory(recipientLogin string) ([]request.Messag
 		return nil, errors.New("can't cast to batch body")
 	}
 	return batch.Messages, nil
+}
+
+func (ch CommunicateHandler) SendMessage(message, recipientLogin string) error{
+	data, err := json.Marshal(map[string]interface{}{"header": "send_message", "body": map[string]string{"token": ch.Profile.Token, "recipient_login": recipientLogin, "data": message}})
+	if err != nil{
+		return err
+	}
+
+	err = ch.Tcp.Send(data)
+	if err != nil{
+		return err
+	}
+
+	ok, err := tools.HandleOK(ch.Tcp)
+	if err != nil {
+		return err
+	}
+	if !ok{
+		return errors.New("ok not received from server :(")
+	}
+
+	return nil
 }
 
 func parseSendingDate(sendingDate int) string{

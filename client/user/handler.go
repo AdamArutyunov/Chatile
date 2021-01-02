@@ -3,8 +3,10 @@ package user
 import (
 	"client/request"
 	"client/tcp"
+	"client/tools"
 	"encoding/json"
 	"errors"
+	"fmt"
 )
 
 func Register(profile Profile, handler tcp.ConnectionHandler) error {
@@ -47,7 +49,7 @@ func Login(login, password string, handler tcp.ConnectionHandler) (bool, Profile
 }
 
 
-func UpdateOnline(handler tcp.ConnectionHandler, p Profile) error {
+func UpdateOnline(handler *tcp.ConnectionHandler, p Profile) error {
 	data, err := json.Marshal(map[string]interface{}{"header": "online", "body": map[string]string{"token": p.Token}})
 	if err != nil{
 		return err
@@ -56,12 +58,13 @@ func UpdateOnline(handler tcp.ConnectionHandler, p Profile) error {
 	if err != nil{
 		return err
 	}
-	reply, err := handler.ReadReply()
-	if err != nil{
+	fmt.Println(handler)
+	ok, err := tools.HandleOK(handler)
+	if err != nil {
 		return err
 	}
-	if reply.Header != "ok"{
-		return request.HandleError(reply)
+	if !ok{
+		return errors.New("ok not received from server :(")
 	}
 	return nil
 }
