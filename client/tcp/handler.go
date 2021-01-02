@@ -1,6 +1,7 @@
 package tcp
 
 import (
+	"client/request"
 	"encoding/json"
 	"net"
 )
@@ -8,11 +9,6 @@ import (
 type ConnectionHandler struct {
 	connector  Connector
 	connection net.Conn
-}
-
-type Answer struct {
-	Header string `json:"header"`
-	Body map[string]interface{}
 }
 
 func (h *ConnectionHandler) OpenConnection() error {
@@ -37,11 +33,15 @@ func (h *ConnectionHandler) Send(data []byte) error {
 	return nil
 }
 
-func (h *ConnectionHandler) ReadReply() (Answer, error) {
-	var ans Answer
-	err := json.NewDecoder(h.connection).Decode(&ans)
-	if err != nil{
-		return ans, err
+func (h *ConnectionHandler) ReadReply() (interface{}, error) {
+	var r request.Req
+	err := json.NewDecoder(h.connection).Decode(&r)
+	if err != nil {
+		return r, err
 	}
-	return ans, nil
+	err = r.ParseReq()
+	if err != nil{
+		return nil, err
+	}
+	return r, nil
 }

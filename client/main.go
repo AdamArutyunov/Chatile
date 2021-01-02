@@ -42,10 +42,10 @@ func main() {
 				ask(&login, "login")
 				ask(&password, "password")
 				ok, profile, err := user.Login(login, password, handler)
-				if err != nil{
+				if err != nil {
 					return err
 				}
-				if ok{
+				if ok {
 					s.Profile = profile
 					s.SetMenu(menuDict["loggedMenu"])
 				}
@@ -63,7 +63,7 @@ func main() {
 				}
 				profile := user.NewProfile(name, login, password)
 				err := user.Register(*profile, handler)
-				if err != nil{
+				if err != nil {
 					return err
 				}
 				color.Green("Регистрация прошла успешно, поздравляем")
@@ -94,6 +94,7 @@ func main() {
 		printCommands(m.Commands)
 		var input string
 		_, _ = fmt.Scanln(&input)
+		// global quit command in menu
 		if input == "q" || input == "quit" {
 			handler.CloseConnection()
 			os.Exit(0)
@@ -109,7 +110,7 @@ func main() {
 				}
 			}
 		}
-		if !found{
+		if !found {
 			color.Red("Такой команды нет :( Повторите попытку")
 		}
 	}

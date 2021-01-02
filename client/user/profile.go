@@ -8,7 +8,7 @@ type Profile struct {
 	Name     string `json:"name"`
 	Login    string `json:"login"`
 	Password string `json:"password"`
-	Token string `json:"-"`
+	Token    string `json:"-"`
 }
 
 func NewProfile(name string, login string, password string) *Profile {

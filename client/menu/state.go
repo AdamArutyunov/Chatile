@@ -6,7 +6,7 @@ import "client/user"
 type State struct {
 	menu     Menu
 	MenuDict map[string]Menu
-	Profile user.Profile
+	Profile  user.Profile
 }
 
 func (s State) GetMenu() Menu {

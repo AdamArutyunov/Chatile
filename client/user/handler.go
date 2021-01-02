@@ -1,9 +1,10 @@
 package user
 
 import (
+	"client/request"
 	"client/tcp"
 	"encoding/json"
-	"github.com/fatih/color"
+	"errors"
 )
 
 func Register(profile Profile, handler tcp.ConnectionHandler) error {
@@ -19,7 +20,7 @@ func Register(profile Profile, handler tcp.ConnectionHandler) error {
 	return nil
 }
 
-func Login(login, password string, handler tcp.ConnectionHandler) (bool, Profile, error){
+func Login(login, password string, handler tcp.ConnectionHandler) (bool, Profile, error) {
 	var p Profile
 	data, err := json.Marshal(map[string]interface{}{"header": "login", "body": map[string]string{"login": login, "password": password}})
 	if err != nil {
@@ -30,17 +31,21 @@ func Login(login, password string, handler tcp.ConnectionHandler) (bool, Profile
 		return false, p, err
 	}
 	ans, err := handler.ReadReply()
-	if err != nil{
+	if err != nil {
 		return false, p, nil
 	}
-	if ans.Header == "error"{
-		color.Red("Ошибка авторизации")
-		return false, p, nil
-	}
-	token, ok := ans.Body["token"].(string)
+	req, ok := ans.(request.Req)
 	if !ok{
-		return false, p, nil
+		return false, p, errors.New("can't decode req to struct")
 	}
-	p.Login, p.Password, p.Token =  login, password, token
+	if req.Header == "error"{
+		return false, p, request.HandleError(req)
+	}
+	authBody, ok := req.Body.(request.AuthBody)
+	if !ok{
+		return false, p, errors.New("can't decode req to struct")
+	}
+
+	p.Login, p.Password, p.Token = login, password, authBody.Token
 	return true, p, nil
 }
