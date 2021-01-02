@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bufio"
 	"client/chat"
 	"client/menu"
 	"client/tcp"
@@ -11,6 +12,7 @@ import (
 	"log"
 	"os"
 	"os/signal"
+	"strings"
 	"syscall"
 )
 
@@ -95,10 +97,13 @@ func main() {
 				return err
 			}
 			chatHandler.PrintMessages(messages) // print history of correspondence
+			scanner := bufio.NewReader(os.Stdin)
 			for{
 				var message string
 				fmt.Print("Enter your message: ")
-				_, _ = fmt.Scanln(&message)
+				message, _ = scanner.ReadString('\n')
+				message = strings.TrimSuffix(message, "\n")
+				color.Red("Your message: " + message)
 
 				if message == "q" || message == "quit"{
 					break
