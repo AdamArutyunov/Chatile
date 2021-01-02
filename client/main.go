@@ -1,6 +1,7 @@
 package main
 
 import (
+	"client/chat"
 	"client/menu"
 	"client/tcp"
 	"client/user"
@@ -80,6 +81,20 @@ func main() {
 		{"test", func(s *menu.State, menuDict map[string]menu.Menu) error {
 			fmt.Println("Hello, user")
 			fmt.Println(s.Profile)
+			return nil
+		}},
+		{"chat", func(s *menu.State, menuDict map[string]menu.Menu) error {
+			var recipientLogin string
+			ask(&recipientLogin, "login with whom you want to chat")
+			chatHandler := chat.CommunicateHandler{
+				Profile: s.Profile,
+				Tcp:     handler,
+			}
+			messages, err := chatHandler.GetHistory(recipientLogin)
+			if err != nil{
+				return err
+			}
+			chatHandler.PrintMessages(messages)
 			return nil
 		}},
 		{"logout", func(s *menu.State, menuDict map[string]menu.Menu) error {

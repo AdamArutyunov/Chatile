@@ -16,19 +16,28 @@ func (r *Req) ParseReq() error{
 	switch r.Header {
 	case "error":
 		{
-			var eBody ErrorBody
-			err := json.Unmarshal(r.RawBody, &eBody)
-			r.Body = eBody
+			var errBody ErrorBody
+			err := json.Unmarshal(r.RawBody, &errBody)
+			r.Body = errBody
 			return err
 		}
 	case "auth":
 		{
-			var aBody AuthBody
-			err := json.Unmarshal(r.RawBody, &aBody)
-			r.Body = aBody
+			var authBody AuthBody
+			err := json.Unmarshal(r.RawBody, &authBody)
+			r.Body = authBody
 			return err
 		}
+	case "message_batch":
+		{
+			var batchBody BatchBody
+			err := json.Unmarshal(r.RawBody, &batchBody)
+			r.Body = batchBody
+			return err
+		}
+
 	}
+
 	return nil
 }
 
