@@ -6,6 +6,7 @@ import (
 	"client/menu"
 	"client/tcp"
 	"client/user"
+	"context"
 	"errors"
 	"fmt"
 	"github.com/fatih/color"
@@ -86,24 +87,33 @@ func main() {
 			return nil
 		}},
 		{"chat", func(s *menu.State, menuDict map[string]menu.Menu) error {
-			var recipientLogin string
-			ask(&recipientLogin, "login with whom you want to chat")
 			chatHandler := chat.CommunicateHandler{
 				Profile: s.Profile,
 				Tcp:     &handler,
 			}
+
+			var recipientLogin string
+			ask(&recipientLogin, "login with whom you want to chat")
+
 			messages, err := chatHandler.GetHistory(recipientLogin)
 			if err != nil{
 				return err
 			}
 			chatHandler.PrintMessages(messages) // print history of correspondence
 			scanner := bufio.NewReader(os.Stdin)
+			ctx, cancel := context.WithCancel(context.Background())
+			wait := make(chan struct{})
+			go chatHandler.StartBatch(ctx, wait)
+			defer func() {
+				fmt.Println("send cancel")
+				cancel()
+				fmt.Println("wait for stop")
+				fmt.Println(<-wait)
+			}()
 			for{
 				var message string
-				fmt.Print("Enter your message: ")
 				message, _ = scanner.ReadString('\n')
 				message = strings.TrimSuffix(message, "\n")
-				color.Red("Your message: " + message)
 
 				if message == "q" || message == "quit"{
 					break
@@ -133,7 +143,7 @@ func main() {
 		_, _ = fmt.Scanln(&input)
 		// global quit command in menu
 		if input == "q" || input == "quit" {
-			handler.CloseConnection()
+			shutdown(handler)
 			os.Exit(0)
 		}
 		found := false

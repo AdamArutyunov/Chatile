@@ -33,7 +33,11 @@ func (r *Req) ParseReq() error{
 			r.Body = batchBody
 			return err
 		}
-
+	case "message":
+		var messageBody MessageBody
+		err := json.Unmarshal(r.RawBody, &messageBody)
+		r.Body = messageBody
+		return err
 	}
 
 	return nil

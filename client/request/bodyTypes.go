@@ -20,3 +20,7 @@ type AuthBody struct {
 type BatchBody struct {
 	Messages []Message
 }
+
+type MessageBody struct {
+	Message
+}
